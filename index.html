@@ -1,0 +1,1536 @@
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GUI PUNK INTERFACE - Ciclo de Vida de Sistemas</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Creepster&family=Permanent+Marker&family=Bungee:wght@400;700&family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Orbitron', monospace;
+            background: 
+                linear-gradient(45deg, #000000 0%, #1a0d1a 25%, #0d1a0d 50%, #1a1a0d 75%, #000000 100%),
+                radial-gradient(circle at 20% 80%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 255, 255, 0.1) 0%, transparent 50%);
+            background-size: 400% 400%, 100% 100%, 100% 100%;
+            background-attachment: fixed;
+            animation: cyberpunkBg 15s ease infinite;
+            min-height: 100vh;
+            color: #F2FA00;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 255, 0, 0.02) 2px,
+                    rgba(0, 255, 0, 0.02) 4px
+                ),
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(255, 0, 255, 0.02) 2px,
+                    rgba(255, 0, 255, 0.02) 4px
+                );
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes cyberpunkBg {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .main-title {
+            font-family: 'Creepster', cursive;
+            font-size: 3.5rem;
+            background: linear-gradient(45deg, #ff00ff, #00ffff, #ffff00, #ff00ff);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 
+                0 0 20px #ff00ff,
+                0 0 40px #00ffff;
+            animation: titlePulse 3s ease-in-out infinite, gradientShift 8s ease infinite;
+            transform: skew(-5deg);
+            margin-bottom: 15px;
+        }
+
+        @keyframes titlePulse {
+            0%, 100% { transform: skew(-5deg) scale(1); }
+            50% { transform: skew(-5deg) scale(1.05); }
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .subtitle {
+            font-family: 'Bungee', cursive;
+            font-size: 1.4rem;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+            transform: skew(3deg);
+        }
+
+        .lifecycle-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .phase-card {
+            background: 
+                linear-gradient(135deg, rgba(255, 0, 255, 0.1) 0%, rgba(0, 255, 255, 0.1) 100%);
+            border: 3px solid;
+            border-radius: 20px;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+            transform: skew(-2deg);
+            transition: all 0.4s ease;
+            cursor: pointer;
+        }
+
+        .phase-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            transform: rotate(45deg);
+            transition: all 0.6s ease;
+        }
+
+        .phase-card:hover::before {
+            animation: shimmer 0.6s ease-in-out;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        .phase-card:hover {
+            transform: skew(2deg) scale(1.03);
+            box-shadow: 
+                0 0 30px currentColor,
+                inset 0 0 30px rgba(255, 255, 255, 0.1);
+        }
+
+        .phase-1 { border-color: #ff0080; color: #ff0080; }
+        .phase-2 { border-color: #00ff80; color: #00ff80; }
+        .phase-3 { border-color: #ff8000; color: #ff8000; }
+        .phase-4 { border-color: #8000ff; color: #8000ff; }
+        .phase-5 { border-color: #ffff00; color: #ffff00; }
+        .phase-6 { border-color: #ff4000; color: #ff4000; }
+
+        .phase-title {
+            font-family: 'Bungee', cursive;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px currentColor;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .phase-icon {
+            font-size: 2rem;
+            animation: iconSpin 4s linear infinite;
+        }
+
+        @keyframes iconSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .phase-content {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #ffffff;
+            text-shadow: 1px 1px 2px #000000;
+        }
+
+        .phase-content p {
+            margin-bottom: 12px;
+        }
+
+        .phase-content ul {
+            margin: 15px 0;
+            padding-left: 20px;
+        }
+
+        .phase-content li {
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .phase-content li::before {
+            content: "▶";
+            color: currentColor;
+            position: absolute;
+            left: -20px;
+            animation: blink 2s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+
+        .comparison-section {
+            margin: 60px 0;
+            padding: 30px;
+            background: 
+                linear-gradient(45deg, rgba(255, 0, 255, 0.05), rgba(0, 255, 255, 0.05));
+            border: 2px dashed #00ffff;
+            border-radius: 15px;
+            position: relative;
+        }
+
+        /* Sección GUI Histórica */
+        .gui-history-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .gui-phase-card {
+            background: 
+                linear-gradient(135deg, rgba(255, 0, 255, 0.1) 0%, rgba(0, 255, 255, 0.1) 100%);
+            border: 3px solid;
+            border-radius: 20px;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+            transform: skew(-2deg);
+            transition: all 0.4s ease;
+            cursor: pointer;
+        }
+
+        .gui-phase-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            transform: rotate(45deg);
+            transition: all 0.6s ease;
+        }
+
+        .gui-phase-card:hover::before {
+            animation: shimmer 0.6s ease-in-out;
+        }
+
+        .gui-phase-card:hover {
+            transform: skew(2deg) scale(1.03);
+            box-shadow: 
+                0 0 30px currentColor,
+                inset 0 0 30px rgba(255, 255, 255, 0.1);
+        }
+
+        .gui-phase-1 { border-color: #ff0080; color: #ff0080; }
+        .gui-phase-2 { border-color: #00ff80; color: #00ff80; }
+        .gui-phase-3 { border-color: #ff8000; color: #ff8000; }
+        .gui-phase-4 { border-color: #8000ff; color: #8000ff; }
+        .gui-phase-5 { border-color: #ffff00; color: #ffff00; }
+        .gui-phase-6 { border-color: #ff4000; color: #ff4000; }
+            text-align: center;
+            margin: 80px 0 50px 0;
+            position: relative;
+        }
+
+        .section-title {
+            font-family: 'Creepster', cursive;
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #ff00ff, #00ffff, #ffff00, #ff00ff);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px #ff00ff;
+            animation: gradientShift 6s ease infinite;
+            margin-bottom: 10px;
+        }
+
+        .section-subtitle {
+            font-family: 'Bungee', cursive;
+            font-size: 1.2rem;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+            transform: skew(-2deg);
+        }
+
+        /* Estilos ADDIE */
+        .addie-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 25px;
+            margin: 50px 0;
+        }
+
+        .addie-phase {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(26, 13, 26, 0.9) 100%);
+            border: 3px solid;
+            border-radius: 20px;
+            padding: 25px;
+            width: 280px;
+            position: relative;
+            transform: skew(-3deg);
+            transition: all 0.4s ease;
+            cursor: pointer;
+        }
+
+        .addie-phase:hover {
+            transform: skew(3deg) scale(1.05);
+            box-shadow: 0 0 30px currentColor;
+        }
+
+        .addie-1 { border-color: #ff0080; color: #ff0080; }
+        .addie-2 { border-color: #00ff80; color: #00ff80; }
+        .addie-3 { border-color: #ff8000; color: #ff8000; }
+        .addie-4 { border-color: #8000ff; color: #8000ff; }
+        .addie-5 { border-color: #ffff00; color: #ffff00; }
+
+        .addie-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .addie-letter {
+            font-family: 'Creepster', cursive;
+            font-size: 3rem;
+            background: currentColor;
+            color: #000000;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            text-shadow: none;
+            animation: letterPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes letterPulse {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(5deg); }
+        }
+
+        .addie-title h3 {
+            font-family: 'Bungee', cursive;
+            font-size: 1.3rem;
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        .addie-content {
+            color: #ffffff;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .addie-content ul {
+            padding-left: 20px;
+        }
+
+        .addie-content li {
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .addie-content li::before {
+            content: "►";
+            color: currentColor;
+            position: absolute;
+            left: -20px;
+            animation: blink 3s ease-in-out infinite;
+        }
+
+        /* Estilos de Requerimientos */
+        .requirements-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin: 50px 0;
+        }
+
+        .req-section {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            padding: 30px;
+            position: relative;
+            border: 3px solid;
+        }
+
+        .functional {
+            border-color: #00ff00;
+            background: linear-gradient(135deg, rgba(0, 255, 0, 0.05), rgba(0, 255, 255, 0.05));
+        }
+
+        .non-functional {
+            border-color: #ff00ff;
+            background: linear-gradient(135deg, rgba(255, 0, 255, 0.05), rgba(255, 255, 0, 0.05));
+        }
+
+        .req-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .req-header h3 {
+            font-family: 'Bungee', cursive;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 15px currentColor;
+        }
+
+        .functional .req-header h3 { color: #00ff00; }
+        .non-functional .req-header h3 { color: #ff00ff; }
+
+        .req-header p {
+            color: #ffffff;
+            font-size: 1.1rem;
+            font-style: italic;
+        }
+
+        .req-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .req-item {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .functional .req-item { border-color: rgba(0, 255, 0, 0.3); }
+        .non-functional .req-item { border-color: rgba(255, 0, 255, 0.3); }
+
+        .req-item:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px currentColor;
+        }
+
+        .functional .req-item:hover { box-shadow: 0 0 20px rgba(0, 255, 0, 0.5); }
+        .non-functional .req-item:hover { box-shadow: 0 0 20px rgba(255, 0, 255, 0.5); }
+
+        .req-item h4 {
+            font-family: 'Bungee', cursive;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: #ffffff;
+            text-shadow: 0 0 5px currentColor;
+        }
+
+        .req-item ul {
+            padding-left: 15px;
+        }
+
+        .req-item li {
+            color: #cccccc;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .req-item li::before {
+            content: "•";
+            color: currentColor;
+            font-weight: bold;
+            position: absolute;
+            margin-left: -15px;
+        }
+
+        .functional .req-item li::before { color: #00ff00; }
+        .non-functional .req-item li::before { color: #ff00ff; }
+
+        .comparison-title {
+            font-family: 'Bungee', cursive;
+            font-size: 2rem;
+            text-align: center;
+            color: #00ffff;
+            text-shadow: 0 0 15px #00ffff;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+        }
+
+        .vs-container {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .advantage-box, .disadvantage-box {
+            padding: 25px;
+            border-radius: 15px;
+            position: relative;
+            transform: skew(-1deg);
+        }
+
+        .advantage-box {
+            background: 
+                linear-gradient(135deg, rgba(0, 255, 0, 0.1), rgba(0, 255, 255, 0.1));
+            border: 2px solid #00ff00;
+            color: #00ff00;
+        }
+
+        .disadvantage-box {
+            background: 
+                linear-gradient(135deg, rgba(255, 0, 0, 0.1), rgba(255, 0, 255, 0.1));
+            border: 2px solid #ff0040;
+            color: #ff0040;
+        }
+
+        .vs-divider {
+            font-family: 'Creepster', cursive;
+            font-size: 3rem;
+            color: #ffff00;
+            text-shadow: 0 0 20px #ffff00;
+            text-align: center;
+            animation: vsGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes vsGlow {
+            from { text-shadow: 0 0 20px #ffff00; }
+            to { text-shadow: 0 0 30px #ffff00, 0 0 40px #ffff00; }
+        }
+
+        .box-title {
+            font-family: 'Bungee', cursive;
+            font-size: 1.3rem;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        .interactive-demo {
+            margin: 60px 0;
+            text-align: center;
+            padding: 40px;
+            background: 
+                radial-gradient(circle, rgba(255, 0, 255, 0.1) 0%, transparent 70%);
+            border: 3px solid #ff00ff;
+            border-radius: 20px;
+            position: relative;
+        }
+
+        .demo-title {
+            font-family: 'Bungee', cursive;
+            font-size: 2rem;
+            color: #ff00ff;
+            text-shadow: 0 0 15px #ff00ff;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+        }
+
+        .demo-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .demo-btn {
+            padding: 15px 25px;
+            border: 2px solid;
+            border-radius: 10px;
+            background: transparent;
+            font-family: 'Orbitron', monospace;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .demo-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .demo-btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-history { border-color: #ff0080; color: #ff0080; }
+        .btn-definition { border-color: #00ff80; color: #00ff80; }
+        .btn-components { border-color: #ff8000; color: #ff8000; }
+        .btn-requirements { border-color: #8000ff; color: #8000ff; }
+
+        .demo-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px currentColor;
+        }
+
+        .timeline {
+            margin: 40px 0;
+            position: relative;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, #ff00ff, #00ffff, #ffff00, #ff00ff);
+            transform: translateX(-50%);
+            animation: timelineGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes timelineGlow {
+            from { box-shadow: 0 0 10px #ff00ff; }
+            to { box-shadow: 0 0 20px #00ffff; }
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            margin: 40px 0;
+            position: relative;
+        }
+
+        .timeline-item:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        .timeline-content {
+            flex: 1;
+            padding: 20px;
+            margin: 0 30px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            position: relative;
+            transform: skew(-1deg);
+        }
+
+        .timeline-item:nth-child(even) .timeline-content {
+            transform: skew(1deg);
+        }
+
+        .timeline-year {
+            font-family: 'Bungee', cursive;
+            font-size: 1.5rem;
+            color: #ffff00;
+            text-shadow: 0 0 10px #ffff00;
+        }
+
+        .timeline-dot {
+            width: 20px;
+            height: 20px;
+            background: #ff00ff;
+            border-radius: 50%;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 15px #ff00ff;
+            animation: dotPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes dotPulse {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.2); }
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            padding: 30px;
+            border-top: 2px solid #00ffff;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .footer-text {
+            font-family: 'Bungee', cursive;
+            font-size: 1.2rem;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+            text-transform: uppercase;
+        }
+
+        /* Responsive mejorado */
+        @media (max-width: 1200px) {
+            .requirements-container {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            
+            .addie-container {
+                justify-content: center;
+            }
+            
+            .addie-phase {
+                width: 300px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-title { font-size: 2.5rem; }
+            .subtitle { font-size: 1.2rem; }
+            .section-title { font-size: 2rem; }
+            
+            .lifecycle-container, .gui-history-container { 
+                grid-template-columns: 1fr; 
+                gap: 20px; 
+            }
+            
+            .vs-container { 
+                grid-template-columns: 1fr; 
+                gap: 20px; 
+            }
+            
+            .vs-divider { 
+                order: -1; 
+                font-size: 2rem;
+            }
+            
+            .demo-buttons { 
+                flex-direction: column; 
+                align-items: center; 
+            }
+            
+            .timeline::before { left: 20px; }
+            .timeline-item { flex-direction: column !important; }
+            .timeline-content { margin: 0 0 0 40px; }
+            .timeline-dot { left: 20px; }
+            
+            .req-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .addie-phase {
+                width: 100%;
+                max-width: 350px;
+            }
+            
+            .addie-letter {
+                font-size: 2.5rem;
+                width: 50px;
+                height: 50px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-title { font-size: 2rem; }
+            .section-title { font-size: 1.5rem; }
+            .phase-card, .gui-phase-card { 
+                padding: 20px;
+                font-size: 0.9rem;
+            }
+            .addie-phase {
+                padding: 20px;
+            }
+            .req-section {
+                padding: 20px;
+            }
+        }
+
+        /* Animaciones de entrada */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px) skew(-5deg);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) skew(-2deg);
+            }
+        }
+
+        .phase-card {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .phase-card:nth-child(1) { animation-delay: 0.1s; }
+        .phase-card:nth-child(2) { animation-delay: 0.2s; }
+        .phase-card:nth-child(3) { animation-delay: 0.3s; }
+        .phase-card:nth-child(4) { animation-delay: 0.4s; }
+        .phase-card:nth-child(5) { animation-delay: 0.5s; }
+        .phase-card:nth-child(6) { animation-delay: 0.6s; }
+    </style>
+</head>
+<body>
+    
+    <div class="container">
+        <header>
+            
+            <p class="main-title">║▌ CICLO DE VIDA DE INTERFACES GRÁFICAS ▐║</p>
+        </header>
+
+        <!-- Sección: Ciclo de Vida de Sistemas -->
+        <div class="section-header">
+            <h1 class="section-title">📡 CICLO DE VIDA DE SISTEMAS 📡</h1>
+            <p>------------------------------------------------------------</p>
+            <p class="subtitle">Fases de desarrollo de sistemas GUI</p>
+            <p>------------------------------------------------------------</p>
+        </div>
+
+        <div class="lifecycle-container">
+            <div class="phase-card phase-1">
+                <div class="phase-title">
+                    <span class="phase-icon">🔍</span>
+                    Análisis de Requisitos
+                </div>
+                <div class="phase-content">
+                    <p><strong>Identificación de necesidades</strong></p>
+                    <ul>
+                        <li>Estudio de usuarios finales</li>
+                        <li>Análisis de procesos actuales</li>
+                        <li>Definición de objetivos</li>
+                        <li>Documentación de requisitos</li>
+                        <li>Factibilidad técnica y económica</li>
+                    </ul>
+                    <p>Base fundamental para el diseño GUI</p>
+                </div>
+            </div>
+
+            <div class="phase-card phase-2">
+                <div class="phase-title">
+                    <span class="phase-icon">🎨</span>
+                    Diseño de Sistema
+                </div>
+                <div class="phase-content">
+                    <p><strong>Arquitectura y estructura</strong></p>
+                    <ul>
+                        <li>Wireframes y mockups</li>
+                        <li>Arquitectura de información</li>
+                        <li>Patrones de diseño GUI</li>
+                        <li>Especificaciones técnicas</li>
+                        <li>Prototipado interactivo</li>
+                    </ul>
+                    <p>Blueprints del sistema visual</p>
+                </div>
+            </div>
+
+            <div class="phase-card phase-3">
+                <div class="phase-title">
+                    <span class="phase-icon">⚡</span>
+                    Implementación
+                </div>
+                <div class="phase-content">
+                    <p><strong>Construcción del sistema</strong></p>
+                    <ul>
+                        <li>Codificación de interfaces</li>
+                        <li>Integración de componentes</li>
+                        <li>Desarrollo de funcionalidades</li>
+                        <li>Control de versiones</li>
+                        <li>Testing continuo</li>
+                    </ul>
+                    <p>De diseño a realidad funcional</p>
+                </div>
+            </div>
+
+            <div class="phase-card phase-4">
+                <div class="phase-title">
+                    <span class="phase-icon">🧪</span>
+                    Testing y Validación
+                </div>
+                <div class="phase-content">
+                    <p><strong>Verificación de calidad</strong></p>
+                    <ul>
+                        <li>Pruebas de usabilidad</li>
+                        <li>Testing de compatibilidad</li>
+                        <li>Pruebas de rendimiento</li>
+                        <li>Validación con usuarios</li>
+                        <li>Corrección de errores</li>
+                    </ul>
+                    <p>Garantía de funcionamiento óptimo</p>
+                </div>
+            </div>
+
+            <div class="phase-card phase-5">
+                <div class="phase-title">
+                    <span class="phase-icon">🚀</span>
+                    Implementación
+                </div>
+                <div class="phase-content">
+                    <p><strong>Puesta en producción</strong></p>
+                    <ul>
+                        <li>Deployment del sistema</li>
+                        <li>Migración de datos</li>
+                        <li>Capacitación de usuarios</li>
+                        <li>Monitoreo inicial</li>
+                        <li>Soporte técnico</li>
+                    </ul>
+                    <p>Sistema operativo y funcional</p>
+                </div>
+            </div>
+
+            <div class="phase-card phase-6">
+                <div class="phase-title">
+                    <span class="phase-icon">🔧</span>
+                    Mantenimiento
+                </div>
+                <div class="phase-content">
+                    <p><strong>Soporte y evolución</strong></p>
+                    <ul>
+                        <li>Corrección de bugs</li>
+                        <li>Actualizaciones de seguridad</li>
+                        <li>Mejoras de rendimiento</li>
+                        <li>Nuevas funcionalidades</li>
+                        <li>Adaptación tecnológica</li>
+                    </ul>
+                    <p>Ciclo continuo de mejora</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de Explicación -->
+        <div class="section-header">
+            <h2 class="section-title">🎮 HISTORIA GUI  🎮</h2>
+            <p>------------------------------------------------------------</p>
+            <p class="section-subtitle">Evolución de interfaces gráficas</p>
+            <p>------------------------------------------------------------</p>
+        </div>
+
+        <div class="gui-history-container">
+            <div class="gui-phase-card gui-phase-1">
+                <div class="phase-title">
+                    <span class="phase-icon">🚀</span>
+                    Origen Histórico
+                </div>
+                <div class="phase-content">
+                    <p><strong>La revolución comenzó en los 70s</strong></p>
+                    <ul>
+                        <li>Xerox desarrolló los primeros conceptos GUI</li>
+                        <li>Xerox Alto: primer PC con interfaz gráfica</li>
+                        <li>Apple Macintosh siguió en los 80s</li>
+                        <li>Smartphones transformaron la interacción</li>
+                    </ul>
+                    <p>De comandos de texto a gestos táctiles</p>
+                </div>
+            </div>
+
+            <div class="gui-phase-card gui-phase-2">
+                <div class="phase-title">
+                    <span class="phase-icon">🎯</span>
+                    Definición
+                </div>
+                <div class="phase-content">
+                    <p><strong>Interfaz persona-máquina</strong></p>
+                    <ul>
+                        <li>Representa código backend de forma visual</li>
+                        <li>Iconos universales (WiFi, papelera)</li>
+                        <li>Independiente del idioma</li>
+                        <li>Simplifica tareas complejas</li>
+                    </ul>
+                    <p>Traductor visual entre humano y máquina</p>
+                </div>
+            </div>
+
+            <div class="gui-phase-card gui-phase-3">
+                <div class="phase-title">
+                    <span class="phase-icon">⚙️</span>
+                    Funcionamiento
+                </div>
+                <div class="phase-content">
+                    <p><strong>Sistema de traducción interactiva</strong></p>
+                    <ul>
+                        <li>Interacción: ratón, teclado, gestos</li>
+                        <li>Movimiento del puntero en pantalla</li>
+                        <li>Ejecución de instrucciones visuales</li>
+                        <li>Alternativa a línea de comandos</li>
+                    </ul>
+                    <p>Comunicación intuitiva con el sistema</p>
+                </div>
+            </div>
+
+            <div class="gui-phase-card gui-phase-4">
+                <div class="phase-title">
+                    <span class="phase-icon">🧩</span>
+                    Componentes
+                </div>
+                <div class="phase-content">
+                    <p><strong>Elementos visuales funcionales</strong></p>
+                    <ul>
+                        <li>Botones y menús desplegables</li>
+                        <li>Campos de entrada y navegación</li>
+                        <li>Iconos y widgets</li>
+                        <li>Ventanas y marcos</li>
+                        <li>Lienzo (canvas)</li>
+                        <li>Programación basada en eventos</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="gui-phase-card gui-phase-5">
+                <div class="phase-title">
+                    <span class="phase-icon">📋</span>
+                    Requisitos
+                </div>
+                <div class="phase-content">
+                    <p><strong>Principios de diseño efectivo</strong></p>
+                    <ul>
+                        <li>Simplicidad y claridad</li>
+                        <li>Orientación a objetivos</li>
+                        <li>Consistencia visual</li>
+                        <li>Tipografía apropiada</li>
+                        <li>Actualizaciones de estado</li>
+                        <li>Experiencia intuitiva</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="gui-phase-card gui-phase-6">
+                <div class="phase-title">
+                    <span class="phase-icon">🔄</span>
+                    Evolución Continua
+                </div>
+                <div class="phase-content">
+                    <p><strong>Adaptación tecnológica constante</strong></p>
+                    <ul>
+                        <li>De PC a dispositivos móviles</li>
+                        <li>Realidad virtual y aumentada</li>
+                        <li>Interfaces de voz</li>
+                        <li>Inteligencia artificial</li>
+                        <li>IoT y dispositivos conectados</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- Sección: Metodología ADDIE -->
+        <div class="section-header">
+            <h2 class="section-title">⚙️ METODOLOGÍA ADDIE ⚙️</h2>
+            <p>------------------------------------------------------------</p>
+            <p class="section-subtitle">Diseño instruccional para interfaces</p>
+            <p>------------------------------------------------------------</p>
+        </div>
+
+        <div class="addie-container">
+            <div class="addie-phase addie-1">
+                <div class="addie-title">
+                    <span class="addie-letter">A</span>
+                    <h3>ANÁLISIS</h3>
+                </div>
+                <div class="addie-content">
+                    <ul>
+                        <li>Análisis de audiencia objetivo</li>
+                        <li>Contexto de uso del sistema</li>
+                        <li>Recursos disponibles</li>
+                        <li>Restricciones tecnológicas</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="addie-phase addie-2">
+                <div class="addie-title">
+                    <span class="addie-letter">D</span>
+                    <h3>DISEÑO</h3>
+                </div>
+                <div class="addie-content">
+                    <ul>
+                        <li>Objetivos de aprendizaje/uso</li>
+                        <li>Estrategias de interacción</li>
+                        <li>Flujo de navegación</li>
+                        <li>Criterios de evaluación</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="addie-phase addie-3">
+                <div class="addie-title">
+                    <span class="addie-letter">D</span>
+                    <h3>DESARROLLO</h3>
+                </div>
+                <div class="addie-content">
+                    <ul>
+                        <li>Creación de contenido</li>
+                        <li>Programación de interfaces</li>
+                        <li>Integración multimedia</li>
+                        <li>Construcción de prototipos</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="addie-phase addie-4">
+                <div class="addie-title">
+                    <span class="addie-letter">I</span>
+                    <h3>IMPLEMENTACIÓN</h3>
+                </div>
+                <div class="addie-content">
+                    <ul>
+                        <li>Entrega del sistema</li>
+                        <li>Formación de usuarios</li>
+                        <li>Apoyo técnico inicial</li>
+                        <li>Monitoreo de adopción</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="addie-phase addie-5">
+                <div class="addie-title">
+                    <span class="addie-letter">E</span>
+                    <h3>EVALUACIÓN</h3>
+                </div>
+                <div class="addie-content">
+                    <ul>
+                        <li>Medición de efectividad</li>
+                        <li>Feedback de usuarios</li>
+                        <li>Análisis de métricas</li>
+                        <li>Mejoras continuas</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección: Requerimientos -->
+        <div class="section-header">
+            <h2 class="section-title">📋 REQUERIMIENTOS DE SISTEMA 📋</h2>
+            <p class="section-subtitle">Especificaciones funcionales y no funcionales</p>
+        </div>
+
+        <div class="requirements-container">
+            <div class="req-section functional">
+                <div class="req-header">
+                    <h3>⚡ REQUERIMIENTOS FUNCIONALES</h3>
+                    <p>Lo que el sistema DEBE hacer</p>
+                </div>
+                <div class="req-grid">
+                    <div class="req-item">
+                        <h4>🔐 Autenticación</h4>
+                        <ul>
+                            <li>Login/logout de usuarios</li>
+                            <li>Gestión de contraseñas</li>
+                            <li>Roles y permisos</li>
+                        </ul>
+                    </div>
+                    <div class="req-item">
+                        <h4>📊 Procesamiento</h4>
+                        <ul>
+                            <li>Cálculos y operaciones</li>
+                            <li>Manipulación de datos</li>
+                            <li>Generación de reportes</li>
+                        </ul>
+                    </div>
+                    <div class="req-item">
+                        <h4>💾 Almacenamiento</h4>
+                        <ul>
+                            <li>CRUD operations</li>
+                            <li>Backup automático</li>
+                            <li>Historial de cambios</li>
+                        </ul>
+                    </div>
+                    <div class="req-item">
+                        <h4>🔗 Integración</h4>
+                        <ul>
+                            <li>APIs externas</li>
+                            <li>Importar/exportar datos</li>
+                            <li>Sincronización</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="req-section non-functional">
+                <div class="req-header">
+                    <h3>🛡️ REQUERIMIENTOS NO FUNCIONALES</h3>
+                    <p>CÓMO debe funcionar el sistema</p>
+                </div>
+                <div class="req-grid">
+                    <div class="req-item">
+                        <h4>⚡ Rendimiento</h4>
+                        <ul>
+                            <li>Tiempo de respuesta < 3s</li>
+                            <li>Concurrencia de usuarios</li>
+                            <li>Optimización de recursos</li>
+                        </ul>
+                    </div>
+                    <div class="req-item">
+                        <h4>🔒 Seguridad</h4>
+                        <ul>
+                            <li>Encriptación de datos</li>
+                            <li>Protección OWASP</li>
+                            <li>Auditoría de accesos</li>
+                        </ul>
+                    </div>
+                    <div class="req-item">
+                        <h4>📱 Usabilidad</h4>
+                        <ul>
+                            <li>Interfaz intuitiva</li>
+                            <li>Accesibilidad WCAG</li>
+                            <li>Responsive design</li>
+                        </ul>
+                    </div>
+                    <div class="req-item">
+                        <h4>🌐 Disponibilidad</h4>
+                        <ul>
+                            <li>Uptime 99.9%</li>
+                            <li>Recuperación de fallos</li>
+                            <li>Escalabilidad horizontal</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="comparison-section">
+            <h2 class="comparison-title">Ventajas vs Inconvenientes</h2>
+            <div class="vs-container">
+                <div class="advantage-box">
+                    <h3 class="box-title">⚡ Ventajas</h3>
+                    <div class="phase-content">
+                        <ul>
+                            <li>Fácil de usar e intuitivo</li>
+                            <li>Visualmente atractivo</li>
+                            <li>Accesible para principiantes</li>
+                            <li>Búsqueda visual de archivos</li>
+                            <li>Navegación rápida</li>
+                            <li>Respuesta visual inmediata</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="vs-divider">VS</div>
+                
+                <div class="disadvantage-box">
+                    <h3 class="box-title">⚠️ Inconvenientes</h3>
+                    <div class="phase-content">
+                        <ul>
+                            <li>Menor flexibilidad</li>
+                            <li>Consume más memoria</li>
+                            <li>Más lenta que CLI</li>
+                            <li>Compleja de desarrollar</li>
+                            <li>Funcionalidad limitada</li>
+                            <li>Dependiente de recursos gráficos</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="interactive-demo">
+            <h2 class="demo-title">Línea de Tiempo Interactiva</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year">1970s</div>
+                        <p>Xerox desarrolla los primeros conceptos de GUI en sus laboratorios de investigación</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year">1973</div>
+                        <p>Xerox Alto: primer ordenador personal con interfaz gráfica completa</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year">1984</div>
+                        <p>Apple Macintosh populariza la GUI para el consumidor general</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year">1995</div>
+                        <p>Windows 95 democratiza las interfaces gráficas en PC</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year">2007</div>
+                        <p>iPhone revoluciona las interfaces táctiles y gestuales</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year">2020s</div>
+                        <p>IA, VR/AR y interfaces conversacionales marcan el futuro</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p class="footer-text">║▌ Sin GUI, la revolución digital no habría sido posible ▐║</p>
+        </footer>
+    </div>
+
+    <script>
+        // Efectos interactivos punk
+        document.addEventListener('DOMContentLoaded', function() {
+            initPunkEffects();
+            addScrollAnimations();
+            createParticleSystem();
+        });
+
+        function initPunkEffects() {
+            const cards = document.querySelectorAll('.phase-card');
+            
+            cards.forEach(card => {
+                card.addEventListener('click', function() {
+                    createEnergyWave(this);
+                    glitchEffect(this);
+                });
+                
+                card.addEventListener('mouseenter', function() {
+                    this.style.zIndex = '10';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.zIndex = '1';
+                });
+            });
+        }
+
+        function createEnergyWave(element) {
+            const wave = document.createElement('div');
+            wave.style.position = 'absolute';
+            wave.style.top = '50%';
+            wave.style.left = '50%';
+            wave.style.width = '20px';
+            wave.style.height = '20px';
+            wave.style.border = `2px solid ${getComputedStyle(element).borderColor}`;
+            wave.style.borderRadius = '50%';
+            wave.style.transform = 'translate(-50%, -50%)';
+            wave.style.animation = 'energyWave 1s ease-out forwards';
+            wave.style.pointerEvents = 'none';
+            
+            element.appendChild(wave);
+            
+            setTimeout(() => wave.remove(), 1000);
+        }
+
+        function glitchEffect(element) {
+            element.style.filter = 'hue-rotate(180deg) brightness(1.5)';
+            setTimeout(() => {
+                element.style.filter = 'hue-rotate(90deg) contrast(1.2)';
+                setTimeout(() => {
+                    element.style.filter = 'none';
+                }, 100);
+            }, 100);
+        }
+
+        function addScrollAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animation = 'fadeInUp 0.6s ease forwards';
+                    }
+                });
+            });
+
+            document.querySelectorAll('.timeline-item').forEach(item => {
+                observer.observe(item);
+            });
+        }
+
+        function createParticleSystem() {
+            const particles = [];
+            const colors = ['#ff00ff', '#00ffff', '#ffff00', '#ff0080', '#00ff80'];
+            
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.style.position = 'fixed';
+                particle.style.width = '2px';
+                particle.style.height = '2px';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.borderRadius = '50%';
+                particle.style.pointerEvents = 'none';
+                particle.style.zIndex = '0';
+                document.body.appendChild(particle);
+                
+                particles.push({
+                    element: particle,
+                    x: Math.random() * window.innerWidth,
+                    y: Math.random() * window.innerHeight,
+                    vx: (Math.random() - 0.5) * 2,
+                    vy: (Math.random() - 0.5) * 2
+                });
+            }
+            
+            function animateParticles() {
+                particles.forEach(particle => {
+                    particle.x += particle.vx;
+                    particle.y += particle.vy;
+                    
+                    if (particle.x < 0 || particle.x > window.innerWidth) particle.vx *= -1;
+                    if (particle.y < 0 || particle.y > window.innerHeight) particle.vy *= -1;
+                    
+                    particle.element.style.left = particle.x + 'px';
+                    particle.element.style.top = particle.y + 'px';
+                });
+                
+                requestAnimationFrame(animateParticles);
+            }
+            
+            animateParticles();
+        }
+
+        // Agregar estilos de animación dinámicamente
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes energyWave {
+                0% {
+                    width: 20px;
+                    height: 20px;
+                    opacity: 1;
+                }
+                100% {
+                    width: 200px;
+                    height: 200px;
+                    opacity: 0;
+                }
+            }
+            
+            @keyframes matrixRain {
+                0% { transform: translateY(-100vh); opacity: 0; }
+                10% { opacity: 1; }
+                90% { opacity: 1; }
+                100% { transform: translateY(100vh); opacity: 0; }
+            }
+            
+            @keyframes cyberpunkGlow {
+                0%, 100% { 
+                    box-shadow: 0 0 5px currentColor;
+                    text-shadow: 0 0 5px currentColor;
+                }
+                50% { 
+                    box-shadow: 0 0 20px currentColor, 0 0 30px currentColor;
+                    text-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Efecto Matrix Rain ocasional
+        function createMatrixRain() {
+            const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+            
+            for (let i = 0; i < 10; i++) {
+                const drop = document.createElement('div');
+                drop.textContent = chars[Math.floor(Math.random() * chars.length)];
+                drop.style.position = 'fixed';
+                drop.style.left = Math.random() * window.innerWidth + 'px';
+                drop.style.top = '-50px';
+                drop.style.color = '#00ff00';
+                drop.style.fontSize = '14px';
+                drop.style.fontFamily = 'monospace';
+                drop.style.pointerEvents = 'none';
+                drop.style.zIndex = '0';
+                drop.style.animation = 'matrixRain 3s linear forwards';
+                
+                document.body.appendChild(drop);
+                
+                setTimeout(() => drop.remove(), 3000);
+            }
+        }
+        
+        // Ejecutar Matrix Rain ocasionalmente
+        setInterval(createMatrixRain, 8000);
+        
+        // Efectos de teclado
+        document.addEventListener('keydown', function(e) {
+            if (e.code === 'Space') {
+                document.body.style.filter = 'invert(1) hue-rotate(180deg)';
+                setTimeout(() => {
+                    document.body.style.filter = 'none';
+                }, 200);
+            }
+        });
+        
+        // Efecto de cursor personalizado
+        const cursor = document.createElement('div');
+        cursor.style.position = 'fixed';
+        cursor.style.width = '20px';
+        cursor.style.height = '20px';
+        cursor.style.border = '2px solid #00ffff';
+        cursor.style.borderRadius = '50%';
+        cursor.style.pointerEvents = 'none';
+        cursor.style.zIndex = '9999';
+        cursor.style.transition = 'all 0.1s ease';
+        cursor.style.transform = 'translate(-50%, -50%)';
+        document.body.appendChild(cursor);
+        
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+        
+        document.addEventListener('mousedown', () => {
+            cursor.style.backgroundColor = '#ff00ff';
+            cursor.style.transform = 'translate(-50%, -50%) scale(1.5)';
+        });
+        
+        document.addEventListener('mouseup', () => {
+            cursor.style.backgroundColor = 'transparent';
+            cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+        });
+        
+        // Ocultar cursor predeterminado
+        document.body.style.cursor = 'none';
+    </script>
+</body>
+</html>
